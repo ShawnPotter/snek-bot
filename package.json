@@ -1,7 +1,7 @@
 {
-  "name": "mybot",
-  "version": "1.0.0",
-  "description": "",
+  "name": "snek-bot",
+  "version": "0.1",
+  "description": "bot to replace twitter links containing videos with vxtwitter links",
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,6 @@
     "discord.js": "^14.3.0",
     "dotenv": "^16.0.2",
     "got": "^12.3.1",
-    "jquery": "^3.6.1",
     "needle": "^3.1.0",
     "oauth-1.0a": "^2.2.6"
   },
