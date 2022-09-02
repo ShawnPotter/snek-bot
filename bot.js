@@ -2,9 +2,13 @@
  * Bot that converts Twitter links with videos to vxtwitter links
  * @Author Shawn Potter
  * @Version 0.1
+ * TODO: 
+ *  - Add functionality to handle multiple URLs
+ *  - Add Slash Commands
 */
 
 require('dotenv').config();
+
 // Require the necessary discord.js classes
 const { discordToken } = require('./config.json');
 const { Client, GatewayIntentBits } = require('discord.js');
@@ -113,16 +117,15 @@ client.on('messageCreate', message => {
 
 	/** 
 	 * Pulls the URL from the message
-	 * TODO: Add functionality to handle multiple URLs
 	*/
 	function getUrl(message) {
 		
 		const urls = message.match(/\bhttps?:\/\/\S+/gi); //save url(s) to an array
-		// console.log(urls);
+		// console.log(urls); // debug
 		const url = urls[0].split('/');
-		// console.log(url);
+		// console.log(url); // debug
 		const idFromUrl = url[5].split('?')[0];
-		// console.log(idFromUrl);
+		// console.log(idFromUrl); // debug
 
 		// assign the twitter username and tweet id string to variables
 		const twitterUser = url[3];
