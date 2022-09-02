@@ -78,12 +78,8 @@ client.on('messageCreate', message => {
 		const username = message.member;
 
 		// split the url mutliple times to properly extract the user and id
-		const discordMsg = message.content.split('/');
-		const splitIdFromMetaData = discordMsg[5].split('?');
+		const { tweetId, twitterUser } = getUrl(message.content);
 
-		// assign the twitter username and tweet id string to variables
-		const twitterUser = discordMsg[3];
-		const tweetId = splitIdFromMetaData[0];
 		const checkTweet = async () => {
 			try {
 				// Make request
@@ -113,5 +109,24 @@ client.on('messageCreate', message => {
 			process.exit();
 		};
 		checkTweet();
+	}
+
+	/** 
+	 * Pulls the URL from the message
+	 * TODO: Add functionality to handle multiple URLs
+	*/
+	function getUrl(message) {
+		
+		const urls = message.match(/\bhttps?:\/\/\S+/gi); //save url(s) to an array
+		// console.log(urls);
+		const url = urls[0].split('/');
+		// console.log(url);
+		const idFromUrl = url[5].split('?')[0];
+		// console.log(idFromUrl);
+
+		// assign the twitter username and tweet id string to variables
+		const twitterUser = url[3];
+		const tweetId = idFromUrl;
+		return { tweetId, twitterUser };
 	}
 });
