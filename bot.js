@@ -10,13 +10,13 @@
 require('dotenv').config();
 
 // Require the necessary discord.js classes
-const { discordToken } = require('./config.json');
-const { Client, GatewayIntentBits } = require('discord.js');
+import { discordToken } from './config.json';
+import { Client, GatewayIntentBits } from 'discord.js';
 
 // Get Tweet objects by ID, using bearer token authentication
 // https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
 
-const needle = require('needle');
+import needle from 'needle';
 
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
