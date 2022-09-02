@@ -1,3 +1,9 @@
+/** 
+ * Bot that converts Twitter links with videos to vxtwitter links
+ * @Author Shawn Potter
+ * @Version 0.1
+*/
+
 require('dotenv').config();
 // Require the necessary discord.js classes
 const { discordToken } = require('./config.json');
@@ -62,6 +68,7 @@ client.once('ready', () => {
 // Log in the client
 client.login(discordToken);
 
+//Read messages and
 client.on('messageCreate', message => {
 
 	if (message.content.includes('https://twitter.com')) {
