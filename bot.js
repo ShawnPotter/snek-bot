@@ -68,15 +68,16 @@ client.once('ready', () => {
 // Log in the client
 client.login(discordToken);
 
-//Read messages and
+//Read messages and replace any twitter links containing videos with a vxtwitter link
 client.on('messageCreate', message => {
 
 	if (message.content.includes('https://twitter.com')) {
 		// console.log('Twitter link detected'); // debug use
 
+		//get the username of the poster
 		const username = message.member;
 
-		// split the string mutliple times to properly extract the user and id
+		// split the url mutliple times to properly extract the user and id
 		const discordMsg = message.content.split('/');
 		const splitIdFromMetaData = discordMsg[5].split('?');
 
