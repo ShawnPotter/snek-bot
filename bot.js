@@ -10,8 +10,8 @@
 require('dotenv').config();
 
 // Require the necessary discord.js classes
-import { discordToken } from './config.json';
-import { Client, GatewayIntentBits } from 'discord.js';
+const { discordToken } = require('./config.json');
+const { Client, GatewayIntentBits } = require('discord.js');
 
 // Get Tweet objects by ID, using bearer token authentication
 // https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
