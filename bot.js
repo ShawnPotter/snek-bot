@@ -10,13 +10,13 @@
 require('dotenv').config();
 
 // Require the necessary discord.js classes
-import { discordToken } from './config.json';
-import { Client, GatewayIntentBits } from 'discord.js';
+const { discordToken } = require('./config.json');
+const { Client, GatewayIntentBits, User, codeBlock } = require('discord.js');
 
 // Get Tweet objects by ID, using bearer token authentication
 // https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
 
-import needle from 'needle';
+const needle = require('needle');
 
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
@@ -74,8 +74,8 @@ client.login(discordToken);
 
 //Read messages and replace any twitter links containing videos with a vxtwitter link
 client.on('messageCreate', message => {
-
-	if (message.content.includes('https://twitter.com')) {
+	
+	if (message.content.includes('https://twitter.com') && !message.author.bot) {
 		// console.log('Twitter link detected'); // debug use
 
 		//get the username of the poster
@@ -95,8 +95,11 @@ client.on('messageCreate', message => {
 					// delete the original message
 					message.delete();
 
+					//load original message into a codeBlock
+					const originalMsg = codeBlock(`${message.cleanContent}`)
+
 					// send message to denote which user sent the link
-					message.channel.send(`${username} posted:`, { 'allowedMentions': { 'users' : [] } });
+					message.channel.send(`${username} posted: ${originalMsg}`, { 'allowedMentions': { 'users' : [] } });
 
 					// send the new vxtwitter message
 					message.channel.send(`https://vxtwitter.com/${twitterUser}/status/${tweetId}`);
