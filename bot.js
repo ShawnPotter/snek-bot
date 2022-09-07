@@ -116,11 +116,12 @@ client.on('messageCreate', message => {
 	}
 
 	/** 
-	 * Pulls the URL from the message
+	 * Pulls the URL(s) from the message
 	*/
 	function getUrl(message) {
 		
-		const urls = message.match(/\bhttps?:\/\/\S+/gi); //save url(s) to an array
+		//save url(s) to an array
+		const urls = message.match(/\bhttps?:\/\/\S+/gi);
 		// console.log(urls); // debug
 		const url = urls[0].split('/');
 		// console.log(url); // debug
