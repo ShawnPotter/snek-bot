@@ -2,12 +2,17 @@
  * Bot that converts Twitter links with videos to vxtwitter links
  * @Author Shawn Potter
  * @Version 0.1
+ * 
+ * config.json is used for Discord token information
+ * .env file is used for Twitter Developer API information
 */
 
 require('dotenv').config();
 // Require the necessary discord.js classes
-const { discordToken } = require('./config.json');
-const { Client, GatewayIntentBits } = require('discord.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { token } = require('./config.json');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
 // Get Tweet objects by ID, using bearer token authentication
 // https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
@@ -60,15 +65,50 @@ const client = new Client({
 	],
 });
 
+//Command Handler
+client.commands = new Collection();
+const commandsPath = path.join(_dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for(const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	// set a new item in the colleciton
+	// with the key as the command name and the value as the exported module
+	client.commands.set(command.data.name, command);
+}
+
 // Display ready message in console
 client.once('ready', () => {
 	console.log('Ready!');
 });
 
+client.on('interactionCreate', async interaction => {
+
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	try {
+		await command.execute(interaction);
+	}
+	catch (error) {
+		console.error(error);
+		await interaction.reply({
+			content: 'There was an error while executing this command!',
+			ephemeral: true,
+		});
+	}
+
+});
+
 // Log in the client
-client.login(discordToken);
+client.login(token);
 
 //Read messages and replace any twitter links containing videos with a vxtwitter link
+/* 
 client.on('messageCreate', message => {
 
 	if (message.content.includes('https://twitter.com')) {
@@ -115,3 +155,4 @@ client.on('messageCreate', message => {
 		checkTweet();
 	}
 });
+ */
