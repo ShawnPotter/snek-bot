@@ -2,59 +2,13 @@
  * Bot that converts Twitter links with videos to vxtwitter links
  * @Author Shawn Potter
  * @Version 0.1
- * 
- * config.json is used for Discord token information
- * .env file is used for Twitter Developer API information
 */
 
-require('dotenv').config();
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
 const { token } = require('./config.json');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-
-// Get Tweet objects by ID, using bearer token authentication
-// https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
-
-const needle = require('needle');
-
-// The code below sets the bearer token from your environment variables
-// To set environment variables on macOS or Linux, run the export command below from the terminal:
-// export BEARER_TOKEN='YOUR-TOKEN'
-const token = process.env.BEARER_TOKEN;
-
-const endpointURL = 'https://api.twitter.com/2/tweets?ids=';
-
-async function getRequest(tweetId) {
-
-	// These are the parameters for the API request
-	// specify Tweet IDs to fetch, and any additional fields that are required
-	// by default, only the Tweet ID and text are returned
-	const params = {
-		// Edit Tweet IDs to look up
-		'ids': `${tweetId}`,
-
-		// Edit optional query parameters here
-		'expansions':'attachments.media_keys',
-	};
-
-	// this is the HTTP header that adds bearer token authentication
-	const res = await needle('get', endpointURL, params, {
-		headers: {
-			'User-Agent': 'v2TweetLookupJS',
-			'authorization': `Bearer ${token}`,
-		},
-	});
-
-	if (res.body) {
-		return res.body;
-	}
-	else {
-		throw new Error('Unsuccessful request');
-	}
-}
-
 
 // Create client instance
 const client = new Client({
@@ -67,7 +21,7 @@ const client = new Client({
 
 //Command Handler
 client.commands = new Collection();
-const commandsPath = path.join(_dirname, 'commands');
+const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for(const file of commandFiles) {
@@ -80,7 +34,7 @@ for(const file of commandFiles) {
 
 // Display ready message in console
 client.once('ready', () => {
-	console.log('Ready!');
+	console.log('S.N.E.K is Ready!');
 });
 
 client.on('interactionCreate', async interaction => {
