@@ -2,12 +2,12 @@
   "name": "snek-bot",
   "version": "0.1",
   "description": "bot to replace twitter links containing videos with vxtwitter links",
-  "main": "bot.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Shawn Potter",
   "license": "ISC",
   "dependencies": {
     "@discordjs/rest": "^1.1.0",

@@ -4,52 +4,11 @@
  * @Version 0.1
 */
 
-require('dotenv').config();
 // Require the necessary discord.js classes
-const { discordToken } = require('./config.json');
-const { Client, GatewayIntentBits } = require('discord.js');
-
-// Get Tweet objects by ID, using bearer token authentication
-// https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/quick-start
-
-const needle = require('needle');
-
-// The code below sets the bearer token from your environment variables
-// To set environment variables on macOS or Linux, run the export command below from the terminal:
-// export BEARER_TOKEN='YOUR-TOKEN'
-const token = process.env.BEARER_TOKEN;
-
-const endpointURL = 'https://api.twitter.com/2/tweets?ids=';
-
-async function getRequest(tweetId) {
-
-	// These are the parameters for the API request
-	// specify Tweet IDs to fetch, and any additional fields that are required
-	// by default, only the Tweet ID and text are returned
-	const params = {
-		// Edit Tweet IDs to look up
-		'ids': `${tweetId}`,
-
-		// Edit optional query parameters here
-		'expansions':'attachments.media_keys',
-	};
-
-	// this is the HTTP header that adds bearer token authentication
-	const res = await needle('get', endpointURL, params, {
-		headers: {
-			'User-Agent': 'v2TweetLookupJS',
-			'authorization': `Bearer ${token}`,
-		},
-	});
-
-	if (res.body) {
-		return res.body;
-	}
-	else {
-		throw new Error('Unsuccessful request');
-	}
-}
-
+const fs = require('node:fs');
+const path = require('node:path');
+const { token } = require('./config.json');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
 // Create client instance
 const client = new Client({
@@ -60,15 +19,50 @@ const client = new Client({
 	],
 });
 
+//Command Handler
+client.commands = new Collection();
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for(const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	// set a new item in the colleciton
+	// with the key as the command name and the value as the exported module
+	client.commands.set(command.data.name, command);
+}
+
 // Display ready message in console
 client.once('ready', () => {
-	console.log('Ready!');
+	console.log('S.N.E.K is Ready!');
+});
+
+client.on('interactionCreate', async interaction => {
+
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	try {
+		await command.execute(interaction);
+	}
+	catch (error) {
+		console.error(error);
+		await interaction.reply({
+			content: 'There was an error while executing this command!',
+			ephemeral: true,
+		});
+	}
+
 });
 
 // Log in the client
-client.login(discordToken);
+client.login(token);
 
 //Read messages and replace any twitter links containing videos with a vxtwitter link
+/* 
 client.on('messageCreate', message => {
 
 	if (message.content.includes('https://twitter.com')) {
@@ -115,3 +109,4 @@ client.on('messageCreate', message => {
 		checkTweet();
 	}
 });
+ */
