@@ -3,7 +3,7 @@ const { getRequest } = require('../twitter/twitter-api')
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('vxreplace')
+		.setName('vxt')
 		.setDescription('Add twitter link in parameter to change into vxtwitter link')
 		.addStringOption(option => 
 			option.setName('input')
@@ -14,7 +14,7 @@ module.exports = {
 		console.log(link);
 
 		if (link.includes('https://twitter.com')) {
-			console.log('Twitter link detected'); // debug use
+			// console.log('Twitter link detected'); // debug use
 
 			// split the url mutliple times to properly extract the user and id
 			const twitterLink = link.split('/');
@@ -28,13 +28,13 @@ module.exports = {
 					// Make request
 					const response = await getRequest(tweetId);
 					if (response.includes.media[0].type === 'video') {
-						console.log(response.includes.media[0].type); // debug
-						console.log('tweet contains video, replacing link'); // debug
+						// console.log(response.includes.media[0].type); // debug
+						// console.log('tweet contains video, replacing link'); // debug
 
 						await interaction.reply(`${interaction.user} posted: https://vxtwitter.com/${twitterUser}/status/${tweetId}`);
 					}
 					else {
-						console.log('no video detected, letting discord embed twitter link');
+						// console.log('no video detected, letting discord embed twitter link'); // debug
 						await interaction.reply('No video detected. Please input a video link.')
 					}
 					return response;
