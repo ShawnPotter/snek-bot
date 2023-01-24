@@ -1,66 +1,78 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
-const fs = require('node:fs');
+const Toggled = require('../data/schema/replace-toggle');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('replace-all')
-		.setDescription("Toggles on SNEK's ability to replace all twitter links with vxtwitter"),
+			.setDescription("Toggles on SNEK's ability to replace all twitter links with vxtwitter")
+		.addBooleanOption(
+			option =>
+			option.setName('toggle')
+				.setDescription('Whether or not the command is turned on (true) or off (false)')
+				.setRequired(true)
+		),
 		async execute (interaction) {
-			// const user = interaction.user;
-			// console.log(user);
-			const hasPermission = interaction.memberPermissions.has(PermissionsBitField.Flags.Administrator);
-			console.log(hasPermission);
-			const guildId = interaction.guild;
-			const data = fs.readFileSync('../data/replace-all-permissions.json');
-			console.log("Current Permission List:");
-			console.log(data);
-			console.log(`Guild ID: ${guildId}`);
+			const guildId = interaction.guild.id;
+			const bool = interaction.options.getBoolean('toggle');
+			let setToggle = await Toggled.findOne({id: guildId});
 
-			const hasPermAlready = checkPermList(data, guildId);
-			console.log(`Guild has already set this permission: ${hasPermAlready}`)
-
-
-			//if user has permission to toggle command and hasn't already toggled this command on
-			if(hasPermission && !hasPermAlready) {
-				let guild = {
-					"guild": `${guildId}`,
-					"toggle": true
+			//if the guild's ID is not in the database
+			if(!setToggle)
+			{
+				if (bool)
+				{
+					setToggle = await new Toggled(
+						{
+							id: interaction.guild.id,
+							toggled: true
+						}
+					)
+					await setToggle.save().catch(console.error);
+					console.log(`Guild ${guildId} has toggled on Replace-All`);
 				}
-				writeToFile(guild);
-				console.log("Guild written to permission list");
-				interaction.reply('guild added');
+				else
+				{
+					await interaction.reply({
+						content: "You haven't turned on Replace-All yet!"
+					});
+				}
 			}
-			else {
-				interaction.reply('error, could not add guild');
+			//if the guild's ID is in the database
+			else
+			{	
+				if (bool && setToggle.toggled === false)
+				{
+					setToggle.toggled = true;
+					await setToggle.save().catch(console.error);
+					
+					await interaction.reply({
+						content: "You have enabled Replace-All!"
+					});
+
+					console.log(`Guild ${guildId} has toggled on Replace-All`);	
+				}
+				else if (!bool && setToggle.toggled === true)
+				{
+					setToggle.toggled = false;
+					await setToggle.save().catch(console.error);
+
+					await interaction.reply({
+						content: "You have disabled Replace-All!"
+					});
+					
+					console.log(`Guild ${guildId} has toggled off Replace-All`);	
+				}
+				else if(bool && setToggle.toggled === true)
+				{
+					await interaction.reply({
+						content: "You have already turned on Replace-All!"
+					});
+				}
+				else {
+					await interaction.reply({
+						content: "You have already turned off Replace-All!"
+					});
+				}
 			}
 		}
-}
-
-function checkPermList(data, guildId) {
-	for(let key of Object.keys(data)) {
-		if(data.length === 0)
-		if(json[key] === guildId) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-}
-
-function writeToFile(data) {
-	const list = fs.readFileSync(data);
-
-	//if list is empty
-	if (list.length === 0) {
-		fs.writeFileSync(list, JSON.stringify([data]));
-	}
-	//else list is not empty
-	else {
-		//append to list
-		const json = JSON.parse(JSON.stringify(list));
-		//add new object to file
-		json.push(data);
-		fs.writeFileSync(list, JSON.stringify(data));
-	}
 }
