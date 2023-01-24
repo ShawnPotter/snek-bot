@@ -7,8 +7,11 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { token } = require('./config.json');
+const { token, MONGO_URI } = require('./config.json');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const mongoose = require('mongoose');
+
+const testSchema = require('./test-schema');
 
 // Create client instance
 const client = new Client({
@@ -32,8 +35,18 @@ for(const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
-// Display ready message in console
-client.once('ready', () => {
+// Connect to database and display ready message
+client.once('ready', async () => {
+	await mongoose.connect(MONGO_URI,
+		{
+			keepAlive: true
+		}
+	)
+
+	await new testSchema({
+		message: "hello world",
+	}).save()
+	
 	console.log('S.N.E.K is Ready!');
 });
 
