@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require("discord.js");
-const { getRequest } = require('../twitter/twitter-api')
+const { SlashCommandBuilder } = require('discord.js');
+const { getRequest } = require('../twitter/twitter-api');
 
 module.exports = {
 	data: new SlashCommandBuilder()

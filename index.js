@@ -7,8 +7,11 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { token } = require('./config.json');
+const { token, MONGO_URI } = require('./config.json');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const mongoose = require('mongoose');
+const database = require('./data/schema/replace-toggle');
+const Twitter = require('./twitter/twitter-api')
 
 // Create client instance
 const client = new Client({
@@ -32,8 +35,13 @@ for(const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
-// Display ready message in console
-client.once('ready', () => {
+// Connect to database and display ready message
+client.once('ready', async () => {
+	await mongoose.connect(MONGO_URI,
+		{
+			keepAlive: true
+		}
+	)
 	console.log('S.N.E.K is Ready!');
 });
 
@@ -58,13 +66,10 @@ client.on('interactionCreate', async interaction => {
 
 });
 
-// Log in the client
-client.login(token);
-
-//Read messages and replace any twitter links containing videos with a vxtwitter link
-/* 
-client.on('messageCreate', message => {
-
+//on messages being created
+client.on('messageCreate', async message => {
+	
+	//if message contains twitter link
 	if (message.content.includes('https://twitter.com')) {
 		// console.log('Twitter link detected'); // debug use
 
@@ -81,19 +86,26 @@ client.on('messageCreate', message => {
 		const checkTweet = async () => {
 			try {
 				// Make request
-				const response = await getRequest(tweetId);
+				const response = await Twitter.getRequest(tweetId);
 				if (response.includes.media[0].type === 'video') {
-					// console.log(response.includes.media[0].type); // debug
-					// console.log('tweet contains video, replacing link'); // debug
 
-					// delete the original message
-					message.delete();
+					const replaceDB = await database.findOne({id: message.guildId});
+					//if Guild is in database then replace tweet
+					if (!replaceDB.toggled === false)
+					{
+						// console.log(response.includes.media[0].type); // debug
+						// console.log('tweet contains video, replacing link'); // debug
 
-					// send message to denote which user sent the link
-					message.channel.send(`${username} posted:`, { 'allowedMentions': { 'users' : [] } });
+						// delete the original message
+						message.delete();
 
-					// send the new vxtwitter message
-					message.channel.send(`https://vxtwitter.com/${twitterUser}/status/${tweetId}`);
+						// send message to denote which user sent the link
+						message.channel.send(`${username} posted:`, { 'allowedMentions': { 'users' : [] } });
+
+						// send the new vxtwitter message
+						message.channel.send(`https://vxtwitter.com/${twitterUser}/status/${tweetId}`);	
+					}
+					
 				}
 				else {
 					console.log('no video detected, letting discord embed twitter link');
@@ -109,4 +121,6 @@ client.on('messageCreate', message => {
 		checkTweet();
 	}
 });
- */
+
+// Log in the client
+client.login(token);
